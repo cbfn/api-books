@@ -1,69 +1,46 @@
-import type { Book, CreateBookInput, UpdateBookInput } from './books.schemas.js';
+import type { BookRepository } from './books.repository.js';
+import type { Book } from './books.schemas.js';
 
-const books = new Map<number, Book>();
+class InMemoryBookRepository implements BookRepository {
+  private readonly books = new Map<number, Book>();
 
-const cloneBook = (book: Book): Book => ({ ...book });
-
-export const listBooks = (): Book[] => {
-  return Array.from(books.values()).map(cloneBook);
-};
-
-export const getBookById = (id: number): Book | undefined => {
-  const book = books.get(id);
-
-  return book ? cloneBook(book) : undefined;
-};
-
-export const createBook = (input: CreateBookInput): Book => {
-  const book = cloneBook(input);
-
-  books.set(book.id, book);
-
-  return cloneBook(book);
-};
-
-export const updateBook = (id: number, input: UpdateBookInput): Book | undefined => {
-  const currentBook = books.get(id);
-
-  if (!currentBook) {
-    return undefined;
+  private cloneBook(book: Book): Book {
+    return { ...book };
   }
 
-  const updatedBook: Book = {
-    ...currentBook,
-    ...input,
-  };
-
-  books.set(id, updatedBook);
-
-  return cloneBook(updatedBook);
-};
-
-export const setBookAvailability = (id: number, available: boolean): Book | undefined => {
-  const currentBook = books.get(id);
-
-  if (!currentBook) {
-    return undefined;
+  list(): Book[] {
+    return Array.from(this.books.values()).map((book) => this.cloneBook(book));
   }
 
-  const updatedBook: Book = {
-    ...currentBook,
-    available,
-  };
+  findById(id: number): Book | undefined {
+    const book = this.books.get(id);
 
-  books.set(id, updatedBook);
+    return book ? this.cloneBook(book) : undefined;
+  }
 
-  return cloneBook(updatedBook);
-};
+  save(book: Book): Book {
+    const bookToPersist = this.cloneBook(book);
 
-export const deleteBook = (id: number): boolean => {
-  return books.delete(id);
-};
+    this.books.set(bookToPersist.id, bookToPersist);
 
-export const hasBook = (id: number): boolean => {
-  return books.has(id);
-};
+    return this.cloneBook(bookToPersist);
+  }
+
+  delete(id: number): boolean {
+    return this.books.delete(id);
+  }
+
+  has(id: number): boolean {
+    return this.books.has(id);
+  }
+
+  reset(): void {
+    this.books.clear();
+  }
+}
+
+export const booksRepository = new InMemoryBookRepository();
 
 export const resetBooksStore = (): void => {
-  books.clear();
+  booksRepository.reset();
 };

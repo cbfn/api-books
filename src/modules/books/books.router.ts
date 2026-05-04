@@ -12,6 +12,7 @@ import {
   getBookById,
   hasBook,
   listBooks,
+  setBookAvailability,
   updateBook,
 } from './books.store.js';
 
@@ -48,6 +49,28 @@ booksRouter.put('/:id', (request, response) => {
   const { id } = bookIdParamsSchema.parse(request.params);
   const payload = updateBookSchema.parse(request.body);
   const book = updateBook(id, payload);
+
+  if (!book) {
+    throw new AppError(`Book with id ${id} not found`, 404);
+  }
+
+  response.status(200).json(book);
+});
+
+booksRouter.post('/:id/borrow', (request, response) => {
+  const { id } = bookIdParamsSchema.parse(request.params);
+  const book = setBookAvailability(id, false);
+
+  if (!book) {
+    throw new AppError(`Book with id ${id} not found`, 404);
+  }
+
+  response.status(200).json(book);
+});
+
+booksRouter.post('/:id/return', (request, response) => {
+  const { id } = bookIdParamsSchema.parse(request.params);
+  const book = setBookAvailability(id, true);
 
   if (!book) {
     throw new AppError(`Book with id ${id} not found`, 404);

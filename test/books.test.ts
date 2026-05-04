@@ -131,6 +131,48 @@ describe('books routes', () => {
     });
   });
 
+  it('borrows an existing book', async () => {
+    await request(app).post('/api/books').send({
+      id: 1,
+      title: 'Refactoring',
+      author: 'Martin Fowler',
+      year: '1999',
+      available: true,
+    });
+
+    const response = await request(app).post('/api/books/1/borrow');
+
+    expect(response.status).toBe(200);
+    expect(response.body).toEqual({
+      id: 1,
+      title: 'Refactoring',
+      author: 'Martin Fowler',
+      year: '1999',
+      available: false,
+    });
+  });
+
+  it('returns an existing book', async () => {
+    await request(app).post('/api/books').send({
+      id: 1,
+      title: 'Refactoring',
+      author: 'Martin Fowler',
+      year: '1999',
+      available: false,
+    });
+
+    const response = await request(app).post('/api/books/1/return');
+
+    expect(response.status).toBe(200);
+    expect(response.body).toEqual({
+      id: 1,
+      title: 'Refactoring',
+      author: 'Martin Fowler',
+      year: '1999',
+      available: true,
+    });
+  });
+
   it('returns conflict when creating a duplicated id', async () => {
     await request(app).post('/api/books').send({
       id: 1,

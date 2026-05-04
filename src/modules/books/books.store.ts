@@ -39,6 +39,23 @@ export const updateBook = (id: number, input: UpdateBookInput): Book | undefined
   return cloneBook(updatedBook);
 };
 
+export const setBookAvailability = (id: number, available: boolean): Book | undefined => {
+  const currentBook = books.get(id);
+
+  if (!currentBook) {
+    return undefined;
+  }
+
+  const updatedBook: Book = {
+    ...currentBook,
+    available,
+  };
+
+  books.set(id, updatedBook);
+
+  return cloneBook(updatedBook);
+};
+
 export const deleteBook = (id: number): boolean => {
   return books.delete(id);
 };
